@@ -1,0 +1,81 @@
+## Foundations of Sovereign Self-Hosting 
+## MEDIA SERVER STACK
+## BASE DOCKER COMPOSE FILE - Part 2
+#DEFINE OUR NETWORKS#
+networks:
+  proxy:  # Proxy Network to route through traefik
+    driver: bridge
+    name: proxy
+  lan:  # General-purpose network
+    driver: bridge
+    name: lan
+  vpn:  # VPN Network
+    driver: bridge
+    name: vpn
+#DEFINE OUR SERVICES#    
+services:
+  plex:
+    image: linuxserver/plex:latest
+    container_name: plex
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=latest
+      - PLEX_CLAIM=YOUR_PLEX_CLAIM
+    volumes:
+      - /path/to/plex/config:/config
+      - /path/to/plex/transcode:/transcode
+      - /path/to/media:/media
+    restart: unless-stopped
+
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    network_mode: host
+    user: 1000:1000
+    volumes:
+      - /path/to/jellyfin/config:/config
+      - /path/to/jellyfin/cache:/cache
+      - /path/to/media:/media
+    restart: unless-stopped
+
+  navidrome:
+    image: deluan/navidrome:latest
+    container_name: navidrome
+    networks:
+      - proxy      
+    ports:
+      - "4533:4533"
+    environment:
+      - ND_LOGLEVEL=info
+    volumes:
+      - /path/to/navidrome/data:/data
+      - /path/to/music:/music
+    restart: unless-stopped
+
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf
+    container_name: audiobookshelf
+    ports:
+      - "13378:80"
+    networks:
+      - proxy
+    volumes:
+      - /path/to/audiobooks:/audiobooks
+      - /path/to/podcasts:/podcasts
+      - /path/to/audiobookshelf/config:/config
+    restart: unless-stopped
+
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:latest
+    container_name: mealie
+    networks:
+      - proxy
+    ports:
+      - "9000:9000"
+    volumes:
+      - /path/to/mealie/data:/app/data
+    environment:
+      - ALLOW_SIGNUP=true
+    restart: unless-stopped
