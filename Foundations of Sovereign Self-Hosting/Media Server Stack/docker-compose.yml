@@ -1,6 +1,6 @@
 ## Foundations of Sovereign Self-Hosting 
 ## MEDIA SERVER STACK
-## BASE DOCKER COMPOSE FILE - Part 2
+## BASE DOCKER COMPOSE FILE - Part 1
 #DEFINE OUR NETWORKS#
 networks:
 
