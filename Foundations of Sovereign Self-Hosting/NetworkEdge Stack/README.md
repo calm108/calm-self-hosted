@@ -56,7 +56,7 @@ This stack uses a Cloudflare Origin Certificate for TLS, mounted directly into T
 
 Your certs.yml should look like:
 
-tls:
+<pre>```yaml tls:
   stores:
     default:
       defaultCertificate:
@@ -64,7 +64,8 @@ tls:
         keyFile: "/etc/traefik/certs/cloudflare-origin.key"
   certificates:
     - certFile: "/etc/traefik/certs/cloudflare-origin.pem"
-      keyFile: "/etc/traefik/certs/cloudflare-origin.key"
+      keyFile: "/etc/traefik/certs/cloudflare-origin.key"```</pre>
+      
 
 Mount this file in your docker-compose-netedge.yml:
 
