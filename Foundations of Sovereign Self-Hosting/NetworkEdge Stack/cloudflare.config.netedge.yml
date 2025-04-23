@@ -1,0 +1,24 @@
+tunnel: ENTER_YOUR_CF_TUNNEL_ID_HERE
+credentials-file: /home/nonroot/.cloudflared/ENTER_YOUR_CF_TUNNEL_ID_HERE.json
+
+# Expose metrics for health checks
+metrics: 0.0.0.0:60123
+
+# NOTE: You should only have one ingress tag, so if you uncomment one block comment the others
+
+# forward all traffic to Reverse Proxy w/ SSL
+ingress:
+  - service: https://192.168.1.94:443 #host LAN IP for Traefik
+    originRequest:
+      originServerName: ENTER_YOUR_DOMAIN.com
+      noTLSVerify: true
+
+#forward all traffic to Reverse Proxy w/ SSL and no TLS Verify
+#ingress:
+#  - service: https://192.168.1.171:1443
+#    originRequest:
+#      noTLSVerify: true
+
+# forward all traffic to reverse proxy over http
+#ingress:
+#  - service: http://192.168.1.171:1180

@@ -1,0 +1,82 @@
+networks:
+  casaproxy:
+    external: true
+  casapilan:
+    external: true
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: CASA_CLOUDFLARED
+    user: root
+    command: tunnel --config /home/nonroot/.cloudflared/config.yml run
+    volumes:
+      - /home/apps/network/appdata/cloudflared:/home/nonroot/.cloudflared
+    healthcheck:
+      test: ["CMD", "cloudflared", "tunnel", "--metrics", "localhost:60123", "ready"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+  traefik:
+    image: traefik:v3.3.4
+    container_name: CASA_TRAEFIK
+    command:
+      - "--configFile=/etc/traefik/traefik.yml"
+    ports:
+      - 80:80
+      - 443:443
+      - 8079:8080
+      - 8088:8088
+    environment:
+      - CF_API_EMAIL=ENTER_YOUR_CF_EMAIL_HERE
+      - CF_API_TOKEN=ENTER_YOUR_CF_API_TOKEN_HERE
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /home/apps/network/proxy/letsencrypt:/letsencrypt
+      - /home/apps/network/proxy/certs:/etc/traefik/certs
+      - /home/apps/network/proxy/traefik.yml:/etc/traefik/traefik.yml
+      - /home/apps/network/proxy/dynamic:/etc/traefik/dynamic
+      - /home/apps/network/proxy/accessslogs:/var/log/traefik
+    networks:
+      - casaproxy
+    depends_on:
+      cloudflared:
+        condition: service_healthy
+  pihole:
+    image: pihole/pihole:latest
+    container_name: CASA_PIHOLE
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "1053:53/tcp"
+      - "1053:53/udp"
+      - "67:67/udp"
+      - "280:80/tcp"
+      - "2443:443/tcp"
+    volumes:
+      - /home/apps/network/appdata/pihole/pihole:/etc/pihole
+      - /home/apps/network/appdata/pihole/dnsmasq.d:/etc/dnsmasq.d
+    environment:
+      - TZ=Europe/Lisbon
+      - FTLCONF_webserver_api_password=ENTER_YOUR_PIHOLE_PASSWORD_HERE
+      - FTLCONF_dns_listeningMode=all
+    networks:
+      casapilan:
+        ipv4_address: 192.168.1.24
+  unbound:
+    image: mvance/unbound:latest
+    container_name: CASA_UNBOUND
+    networks:
+      casapilan:
+        ipv4_address: 192.168.1.50
+    volumes:
+      - type: bind
+        source: ./unbound.conf
+        target: /opt/unbound/etc/unbound/unbound.conf
+        read_only: true
+    healthcheck:
+      test: ["CMD-SHELL", "drill @127.0.0.1 google.com || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
