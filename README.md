@@ -41,13 +41,16 @@ This educational series walks through the process of building a complete media s
 ## 📂 Repo Structure
 
 ```
-calm-self-hosted/
+sovereign-self-hosted/
 ├── Foundations of Sovereign Self-Hosting/
 │   ├── Part-1-Environment/
 │   ├── Part-2-Players/
-│   ├── ...
+│   ├── Part-3-Managers/
+│   ├── Part-4-Downloaders/
+│   ├── Part-3-Requests-Analytics/
 ├── Ansible/                   # WIP automation
 ├── Compose-Stacks/            # Modular stacks
+|   ├── NetworkEdge Stack      # Modular Network Edge stack with Cloudflare and Traefik
 └── README.md                  # This file
 ```
 
